@@ -1,0 +1,485 @@
+---
+title: "Credit Risk-Comprehensive Analysis by Data Science"
+author: "FNU_Ashima"
+format: html
+editor: visual
+Date: 10/09/2023
+---
+
+# Credit Risk-Comprehensive Analysis by Data Science
+
+## *Introduction*
+
+In this analysis, we are testing various models in machine learning and analyze which one is best suited to predict credit risk of the loan applicants from the data based on various factors related to prospective credit borrowers that were interested in taking loan from the financial institutions. In this analysis, 20 variables/attributes have been used to assess possible degree of risk to the lender in case a loan is sanctioned and disbursed to the person under consideration.
+
+## Objective
+
+The objective of the analysis is to maximize lending growth of the financial institutions by maintaining a strong focus on credit risk assessment to minimize the potential losses and maximize the profits. Data analytics and machine learning will be leveraged on the data set, so as to make better decisions regarding lending to the loan applicants.
+
+## *Dataset*
+
+The dataset is a csv file named german_data_credit_risk.csv. It contains 1000 observations with 20 independent variables with nominal(13) and numerical(7). This dataframe has been prepared by Prof. Hofmann. This gives information about customers who have come to bank with their loan application. The attributes are used to assess their risk category(bad or good) while accessing their loan credit worthiness.
+
+#### Risk classification and meaning:
+
+-   Good risk - The loan applicants with high credit worthiness i.e. the ones with good chances of payback are in the good risk category. Here, it is represented by 1.
+
+-   Bad risk- those customers for whom chances of paying back are very less, constitute bad risk and is shown with '2' in the variable named Cost.Matrix.Risk.
+
+    Here, 20 variables are taken as independent ones while the ultimate target variable is the Cost.Matrix.Risk. Because the risk prediction will be done by using machine learning algorithms after assessing the independent variables as input.
+
+    Also, the problem under consideration can be addressed through supervised learning as we have labeled inputs and corresponding target variable will be analysed through classification and regression models. This will help in getting a better idea about to whom the loan should be given after getting corresponding risk category (1 or 2).
+
+```{r}
+# Let's call all required libraries
+library(tidyverse)
+library(tidymodels)
+library(viridis)
+library(skimr)
+```
+
+<!--# Fisrt,import dataset german_data_credit_risk.csv from the sysytem into R studio -->
+
+<!--# Rename the dataset as risk for makimg the calling easier at later stages of analysis-->
+
+```{r}
+risk <- read.csv("/Users/ashima/Downloads/german_data_credit_risk.csv")
+
+```
+
+## *Variables and their meaning*
+
+1.  **Status.of.existing.checking.account-A qualitative variable**
+
+It shows the current balance in checking account of the debtor.\
+A11 : represents \< 0 DM (where DM is Deutsche Mark, the currency of West Germany)\
+A12 : 0 \<= \... \< 200 DM\
+A13 : \... \>= 200 DM / salary assignments for at least 1 year\
+A14 : means no checking account
+
+-   **Duration.in.month- A numerical attribute**
+
+-   **Credit.history- A qualitative variable**
+
+    It shows credit history of the debtor.\
+    A30 : no credits taken/all credits paid back duly\
+    A31 : all credits at this bank paid back duly\
+    A32 : existing credits paid back duly till now\
+    A33 : delay in paying off in the past\
+    A34 : critical account/other credits existing (not at this bank)
+
+-   **Purpose- A qualitative variable**
+
+    It is showing the purpose of loan.\
+    A40 : car (new)\
+    A41 : car (used)\
+    A42 : furniture/equipment\
+    A43 : radio/television\
+    A44 : domestic appliances\
+    A45 : repairs\
+    A46 : education\
+    A47 : vacation\
+    A48 : retraining\
+    A49 : business\
+    A410 : others
+
+-   **Credit.amount- A numerical attribute**
+
+    It shows the amount of credit being applied for or given to the borrower.
+
+-   **Savings.account.bonds- A qualitative variable**
+
+    It gives balance in saving accounts or investments in bonds,if any.\
+    A61 : \... \< 100 DM\
+    A62 : 100 \<= \... \< 500 DM\
+    A63 : 500 \<= \... \< 1000 DM\
+    A64 : .. \>= 1000 DM\
+    A65 : unknown/ no savings account
+
+-   **Present.employment.since- A qualitative variable**\
+    A71 : meaning unemployed\
+    A72 : \... \< 1 year\
+    A73 : 1 \<= \... \< 4 years\
+    A74 : 4 \<= \... \< 7 years\
+    A75 : .. \>= 7 years
+
+-   **Installment.rate.in.percentage.of.disposable.income- A numerical attribute**
+
+    1.  1: This represents that a small portion of the borrower's disposable income (say \< 20%) is consumed to pay installment for loans.
+
+    2.  2: It shows that a moderate portion of the borrower's disposable income (say 20% to 25%) is allocated to pay loans.
+
+    3.  3: It indicate that a significant portion of disposable income (say 25% to 35%) is used for paying off loans.
+
+    4.  4: The highest percentage(say \> 35 percent) of the borrower's disposable income is used to serve loan installments.
+
+-   **Personal.status.and.sex- A qualitative variable**\
+    A91 : male : divorced/separated\
+    A92 : female : divorced/separated/married\
+    A93 : male : single\
+    A94 : male : married/widowed\
+    A95 : female : single
+
+-   **Other.debtors...guarantors- A qualitative variable**
+
+    It tells whether debtor is a co applicant or guarantor in other loans or not.\
+    A101 : none\
+    A102 : co-applicant
+
+    A103 : guarantor
+
+-   **Present.residence.since- A numerical attribute**
+
+-   **Property- A qualitative variable**
+
+    A representation of possessions of the debtor.
+
+    A121 : real estate\
+    A122 : if not A121 : building society savings agreement/life insurance\
+    A123 : if not A121/A122 : car or other, not in variable 6\
+    A124 : unknown / no property
+
+-   **Age.in.years- A numerical attribute**
+
+-   **Other.installment.plans- A qualitative variable**\
+    A141 : bank\
+    A142 : stores\
+    A143 : none
+
+-   **Housing- A qualitative variable**\
+    A151 : rent\
+    A152 : own\
+    A153 : for free
+
+-   **Number.of.existing.credits.at.this.bank- A numerical attribute**
+
+-   **Job- A qualitative variable**\
+    A171 : unemployed/ unskilled - non-resident\
+    A172 : unskilled - resident\
+    A173 : skilled employee / official\
+    A174 : management/ self-employed/highly qualified employee/ officer
+
+-   **Number.of.people.being.liable.to.provide.maintenance.for- A numerical attribute**
+
+-   **Telephone- A qualitative variable**\
+    A191 : none\
+    A192 : yes, registered under the customers name
+
+-   **foreign.worker- A qualitative variable**\
+    A201 : yes\
+    A202 : no
+
+-   **Cost.Matrix.Risk**
+
+    1 : Good Risk
+
+    2 : Bad Risk
+
+    ## *Data Exploration*
+
+    Data is explored by checking:
+
+-   Distribution of attributes(uni variate analysis)
+
+-   Behavior of different variables against each other(bi variate analyis), so that risk analysis can be done effectively. It will also help in checking effectiveness of machine learning model.
+
+    Different attributes are analyzed through data visualization methods so as to get a better understanding about their pattern.
+
+```{r}
+# getting an overall idea about the dataset, what all variables are characters/integers,what are their names, number of rows and columns in the dataset.
+glimpse(risk)
+```
+
+```{r}
+risk|>skim()
+```
+
+### Achieving the objective through ML vs Manually
+
+The following uni variate, bi variate and multi-variate analysis will be helpful in deciding manually about the risk component and regular loan payment of the debtor. If the credit history is good, with comparatively lower age bracket, lesser number of dependents, own house/property, high balance in checking and saving account, enough disposable income to pay off the loan under consideration(after deducting all the existing loans), then risk will be lower to pay off the debt. Lets start the data visualization process for better analyzing the attributes. At later stages, we will train the data to test on a particular machine learning model.
+
+```{r}
+duration <- risk |> ggplot(aes(x=`Duration.in.month`))+geom_histogram()+theme_minimal()
+duration
+```
+
+\# Inference from above plot:
+
+The "duration in month" variable in the data set represents the time, in months, for which a loan is taken, and it plays a crucial role in assessing credit risk and determining the terms of the loan.
+
+Shorter durations may be associated with lower risk, while longer durations may introduce additional risk factors that need to be considered in the credit assessment process.
+
+```{r}
+
+# bar plot for counting number of loan takers in each category of checking account balance. 
+
+checking_bal<-ggplot(risk, aes(x = Status.of.existing.checking.account)) + geom_bar() + labs(title = "customer count for each checking account balance category", x = "Status.of.existing.checking.account", y = "Count")
+checking_bal
+```
+
+#The above bar graph shows that maximum debtors have no checking account and minimum number has balance \> 200 DM. So, caution has to be exercised while granting loans to customers with lower balance in checking account. Because that account balance is an indicator of savings the borrower has and also act as a parameter to assess credit worthiness.
+
+```{r}
+risk$Credit.history <- as.factor(risk$Credit.history)
+# bar plot for credit history status of applicants. 
+cred_hist <-risk |> ggplot(aes(x = Credit.history,fill = "darkblue")) + labs(title = "Credit History Distribution", x = "Credit.history", y = "Count") + geom_bar()
+cred_hist
+```
+
+\# Credit History is the most significant indicator to assess credit worthiness of a prospective borrower as it tells how the person under consideration has performed vis a vis loan repayments in the past. Here, we have maximum number of applicants in the A32 category, which means they have paid off all past debts timely. Thus, a good indicator for the creditor as it minimises the credit risk. But, beware of customers in A34 category(the second highest on the above graph), so they have critical accounts in past, so highlighting a high risk.
+
+```{r}
+# Age wise distribution of the number of applicants
+age_credit <- risk |> ggplot(aes(x=`Age.in.years`))+geom_histogram()
+age_credit
+```
+
+\# inference from above histogram :-
+
+Around 25-35 years age is maximum among loan applicants and then its decreasing.This is a good indiactor for decresing risk in loan payments because younder applicants have a wider lifetime to pay the debt off than older ones.
+
+```{r}
+sex_dist <- table(risk$Personal.status.and.sex) / length(risk$Personal.status.and.sex) * 100
+
+# % Distribution on a pie chart
+pie(sex_dist, main = "Percentage Distribution among sex of applicants", labels = paste(names(sex_dist), "\n", round(sex_dist, 1), "%"))
+
+```
+
+\# The pie chart shows single male are most interested in taking loans(54.8 %), followed by female(31 %) ,while divorced male are least(5%) interested.
+
+```{r}
+# category wise loan distribution visualization 
+
+loan_cat <- risk |> ggplot(aes(x=Purpose,color='green'))+geom_bar()
+loan_cat
+```
+
+\# Maximum loan seekers are for radio/television, followed by a new car. So the financial institution should focus on these segments for maximising its loan portfolio.It can be done even by deploying more HR personel in these loan segments. Also, the ML models should be robustly trained in these so that risk can be assessed optimally for these high in demand areas.
+
+```{r}
+##  Relationship between number of existing loans vs the credit amount for all the personal belonging to various sex
+crAmnt_exLoan_sex <- risk |>ggplot(aes(x=Number.of.existing.credits.at.this.bank ,y=Credit.amount, color = Personal.status.and.sex)) + geom_abline(lty = 2, col = "gray", linewidth = 1.5) + geom_point(alpha = 0.5)
+crAmnt_exLoan_sex
+```
+
+\# the above plot helps identify some outliers in the data , moreover it tells that separated/divorced male have least number of existing loans while single male have the highest number in existing loans(A93).This plot is in direct consonance with the above pie chart which shows the proportion of loan applicants as per sex and status. Also, as the number of existing loans increase, the credit amount decreases(as less disposable income remained with the debtor to pay off the next loan).
+
+```{r}
+
+# Plot to show the relationship between the two variables(bi variate analyis)
+Emp_savBal <- risk |> ggplot(aes(x = Present.employment.since, fill = Savings.account.bonds)) + geom_bar(position = "dodge") + labs(title = "Relation btw years in Present Employment and invstmnt in Savings Account/Bonds",x = "Present Employment Since",y = "Count",fill = "Savings Account/Bonds") 
+Emp_savBal
+
+
+```
+
+\# Inference from above plot: As A61(\<100 DM in saving account) is predominant in all employment types, irrespective of years in current employment, so this attribute can be less relied on when checking risk category of an applicant. Moreover, A65(unknown/no saving account) is the second dominant category, thus clearly making this variable not an independent variable to calculate the dependent variable (Risk) by ML algorithms.
+
+```{r}
+# a multivariate analysis
+inst_credit<-risk|> ggplot(aes(x=Credit.amount,y=Installment.rate.in.percentage.of.disposable.income,color=Property)) +  geom_point() + geom_smooth(method = "lm") 
+inst_credit
+```
+
+\# In above multivariate analysis, a linear model is used to draw the line of best fit.
+
+Property(a categorical)
+
+This graph shows an inverse relationship between installment and credit amount, meaning as the amount of loan installment increases, less loan can be given to the applicant, because less disposable income is left with them. So a higher values in installment(3 or 4) is riskier when it comes to loan repayment, because they have high debt to income ratio.
+
+Moreover, loan installment decreases for those owning a real estate property and the trend increases for those not owning one. So, a clear indicator of a more secure loan(less risk) to those owning a collateral.
+
+## Data cleaning
+
+### Filtering out outliers:
+
+From the above graph, it is indicative that some applicants have been assigned high credit amount, inspite of having higher installment to income ratio and even possessing minimal or no property. So we are removing them from our dataset for training and testing for improved accuracy.
+
+```{r}
+risk_filtered<-risk|>filter(Credit.amount<=12000)
+```
+
+### Finding out missing values
+
+The data should be free from missing/NA values, if any, so as to perform ML models in training and testing the data. As a pre processing step, let's analyse the data set for those values.
+
+```{r}
+is_na <- is.na(risk)
+```
+
+\# So, the dataset under consideration has no missing/NA observations. So we are good to work on it as such.
+
+### Feature selection:
+
+A few variables have been omitted from the final training and testing dataset as their relationship does not symbolize a meaning when analyzing credit risk(target variable). The final dataset is follows:-
+
+```{r}
+risk_selected <- select(risk_filtered,Duration.in.month, Credit.history,Purpose,Present.employment.since,Installment.rate.in.percentage.of.disposable.income,Personal.status.and.sex,Other.debtors...guarantors,Present.residence.since,Property,Age.in.years,Other.installment.plans,Housing,Number.of.existing.credits.at.this.bank,Number.of.people.being.liable.to.provide.maintenance.for,Cost.Matrix.Risk.)
+```
+
+## Testing Models
+
+### Short listing of promising models
+
+#### 1. Classification Model
+
+\# As our final dataset contains a mix of numerical and categorical variables, so random forest model should be the right fit.
+
+Moreover, the regression model doesn't work on this dataset because that is more suitable when target variable has continously changing values(such as price). In contrast, we have just 1 and 2 in the target variable(credit risk), so a random forest classification model is more suited here. Let's apply that.
+
+```{r}
+# call library random forest
+library(randomForest)
+
+```
+
+### Data splitting-Train and Test data
+
+Divide the whole data into training and testing data.
+
+```{r}
+# converting the target variable to factor from integer
+risk_selected$Cost.Matrix.Risk. <- as.factor(risk_selected$Cost.Matrix.Risk.)
+```
+
+```{r}
+set.seed(42)
+risk_split <- initial_split(risk_selected)
+risk_split
+```
+
+```{r}
+risk_train <- training(risk_split)
+risk_test <- testing(risk_split)
+```
+
+```{r}
+deciding_varibles <- Cost.Matrix.Risk. ~ Duration.in.month +  Credit.history+Purpose+Present.employment.since+Installment.rate.in.percentage.of.disposable.income+Personal.status.and.sex+Other.debtors...guarantors+Present.residence.since+Property+Age.in.years+Other.installment.plans+Housing+Number.of.existing.credits.at.this.bank+Number.of.people.being.liable.to.provide.maintenance.for
+```
+
+### Model Training
+
+```{r}
+tree_spec <- decision_tree() %>% 
+  set_mode("classification")
+tree_spec
+```
+
+```{r}
+risk_fit<-workflow(deciding_varibles, tree_spec) %>%
+  fit(data = risk_train)
+risk_fit
+```
+
+```{r}
+rndm_frst <- randomForest(deciding_varibles,ntree=500,data = risk_train,importance=TRUE) # imp of each variable
+rndm_frst
+```
+
+```{r}
+plot(rndm_frst)
+```
+
+In the above plot, red line shows the exact result for the data in the dataset here and the error keep on decreasing with increase in number of trees.
+
+But green line makes more sense here, as that's for validation and unseen data. So as per that optimum number of trees in forest should be around 400-500. So now check error percentage by changing number of trees.
+
+```{r}
+rndm_frst <- randomForest(deciding_varibles,ntree=400,data = risk_train,importance=TRUE) # imp of each variable
+rndm_frst
+```
+
+```{r}
+rndm_frst <- randomForest(deciding_varibles,ntree=300,data = risk_train,importance=TRUE) # imp of each variable
+rndm_frst
+```
+
+```{r}
+rndm_frst <- randomForest(deciding_varibles,ntree=200,data = risk_train,importance=TRUE) # imp of each variable
+rndm_frst
+```
+
+```{r}
+rndm_frst <- randomForest(deciding_varibles,ntree=600,data = risk_train,importance=TRUE) # imp of each variable
+rndm_frst
+```
+
+```{r}
+rndm_frst <- randomForest(deciding_varibles,ntree=800,data = risk_train,importance=TRUE) # imp of each variable
+rndm_frst
+```
+
+Thus error started to increase after 500 trees. so do not overfit the model now.
+
+### Testing and evaluating the system
+
+```{r}
+rf_spec <- rand_forest(trees = 500, mode = "classification")
+rf_spec
+```
+
+```{r}
+rf_wf <- workflow(deciding_varibles, rf_spec)
+rf_wf
+```
+
+```{r}
+final_fit <- last_fit(rf_wf, risk_split) #last_fit() - after determining the best model, the final fit on the entire                                                 training set is needed and is then evaluated on the test set.
+
+
+
+final_fit
+```
+
+```{r}
+collect_metrics(final_fit)
+```
+
+```{r}
+collect_predictions(final_fit)
+```
+
+#### 2. Logistic Regression -
+
+Let's try training and testing our dataset on logistics model and see how much insightful and accurate it is.
+
+```{r}
+risk <- risk |> 
+  mutate(risk_modelled =ifelse(Cost.Matrix.Risk. == 1,0,1))
+```
+
+### Data splitting-Train and Test data
+
+```{r}
+set.seed(42)
+risk_model_split<-initial_split(risk)
+risk_model_split
+```
+
+```{r}
+risk_model_train <- training(risk_model_split)
+risk_model_test <- testing(risk_model_split)
+```
+
+```{r}
+# Apply the model
+cric_log_model <- glm(risk_modelled ~ Duration.in.month +  Credit.history+Purpose+Present.employment.since+Installment.rate.in.percentage.of.disposable.income+Personal.status.and.sex+Other.debtors...guarantors+Present.residence.since+Property+Age.in.years+Other.installment.plans+Housing+Number.of.existing.credits.at.this.bank+Number.of.people.being.liable.to.provide.maintenance.for, data = risk_model_train , family = "binomial")
+```
+
+```{r}
+risk_pred <- predict(cric_log_model, newdata = risk_model_test, type = "response")
+risk_pred
+```
+
+```{r}
+predicted_risk <- ifelse(risk_pred > 0.5, 1, 2)
+predicted_risk
+```
+
+```{r}
+confusion_matrix <- table(Predicted = predicted_risk, Actual = risk_model_test$risk_modelled)
+#confusion_matrix
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+cat("The accuracy of this logistic regression model is : ", accuracy*100 , "%")
+```
